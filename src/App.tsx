@@ -1,35 +1,56 @@
+import { EditModal } from '@/posts/EditModal'
+import { PostList } from '@/posts/PostList'
+import { PostView } from '@/posts/PostView'
+import { useDisclosure } from '@/posts/useDisclosure'
+import { usePosts } from '@/posts/usePosts'
 import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
 import './App.css'
 
 function App() {
-  const [count, setCount] = useState(0)
+	const { posts, byId, isLoading, saveTitle } = usePosts()
+	// page state
+	const [selectedId, setSelectedId] = useState<number | null>(null)
+	// ui state
+	const edit = useDisclosure(false)
 
-  return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+	const selected = selectedId ? byId.get(selectedId) : undefined
+
+	return (
+		<div className="flex flex-col gap-5 justify-center items-center w-full h-full bg-zinc-200">
+			<div className="min-w-3xl min-h-52 p-5 bg-white shadow-md rounded-sm">
+				<PostList
+					posts={posts}
+					isLoading={isLoading}
+					selectedId={selectedId}
+					onSelect={setSelectedId}
+				/>
+			</div>
+
+			<div className="min-w-3xl min-h-52 p-5 bg-white shadow-md rounded-sm">
+				<PostView
+					post={selected}
+					onEdit={() => {
+						if (!selected) return
+
+						edit.open()
+					}}
+				/>
+			</div>
+
+			<EditModal
+				opened={edit.opened}
+				onClose={edit.close}
+				post={selected}
+				onSave={async nextTitle => {
+					if (!selected) return
+
+					await saveTitle(selected.id, nextTitle)
+
+					edit.close()
+				}}
+			/>
+		</div>
+	)
 }
 
 export default App

@@ -1,73 +1,22 @@
-# React + TypeScript + Vite
+## 왜 만들었나요
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+상태를 어디에 두는지에 따라 책임을 나누는 기준을 예제로 정리했습니다.
 
-Currently, two official plugins are available:
+## 어떤 시나리오로 작성했나요?
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- 상단: 게시글 목록(PostList)
+- 하단: 선택된 게시글 상세(PostView)
+- Edit 버튼: 모달(EditPostModal)에서 제목 수정
 
-## React Compiler
+## 상태 책임 분리 기준
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- 서버: posts 데이터(usePosts)
+- 페이지: selectedId(선택한 게시글 ID)
+- UI: modal opened(useDisclosure)
+- Form: title input(모달 내부)
+- Derived: isDirty / canSave(불필요한 상태 증가 방지)
 
-## Expanding the ESLint configuration
+## 핵심
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
-
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+- refetch나 전역 상태 없이도 페이지 맥락, UI, 폼 상태를 분리해 복잡도를 낮춘 방식
+- 저장 가능 여부를 state로 두지 않고 derived로 계산
